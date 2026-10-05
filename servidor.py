@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash
 
 
 app = Flask(__name__)
+app.json.ensure_ascii = False 
 NOMBRE_DB = 'usuarios.db'
 
 app.config['SECRET_KEY'] = 'tu_clave_secreta'
@@ -39,26 +40,26 @@ def obtener_conexion():
 # Endpoint: Registro
 # ---------------------------------------------------------
 
-def registrar_usuario(nombre_usuario, contraseña):
-
+@app.route("/registro", methods=["POST"])
+def registrar_usuario():
     datos = request.get_json(silent=True)
  
     if not datos or "usuario" not in datos or "contraseña" not in datos:
         return jsonify({"error": "Faltan datos: se requiere 'usuario' y 'contraseña'"}), 400
 
-    nombre_usuario = datos["usuario"]
-    contraseña = datos["contraseña"]
+    usuario_nombre = datos["usuario"]
+    usuario_pass = datos["contraseña"]
     
-    contraseña_hash = generate_password_hash(contraseña)
+    pass_hash = generate_password_hash(usuario_pass)
     conn = obtener_conexion()
   
     try:
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO usuarios (nombre_usuario, contraseña_hash) VALUES (?, ?)', (nombre_usuario, contraseña_hash))
+        cursor.execute('INSERT INTO usuarios (nombre_usuario, contraseña_hash) VALUES (?, ?)', (usuario_nombre, pass_hash))
         conn.commit()
-        return jsonify({"status": f"Usuario '{nombre_usuario}' registrado con éxito"}), 200
+        return jsonify({"status": f"Usuario '{usuario_nombre}' registrado exitosamente"}), 200
     except sqlite3.IntegrityError:
-        return jsonify({"error": f"El usuario '{nombre_usuario}' ya existe"}), 400
+        return jsonify({"error": f"El usuario '{usuario_nombre}' ya existe"}), 400
     finally:
         conn.close()
 
