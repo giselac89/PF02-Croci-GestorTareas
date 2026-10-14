@@ -5,7 +5,15 @@
 
 import requests
 
-url = "http://localhost:5000/tareas"
+URL_BASE = "http://localhost:5000"
+
+def registrar_usuario(usuario, contraseña):
+    url_registro = "http://localhost:5000/registro"
+    datos = {"usuario": usuario, "contraseña": contraseña}
+    response = requests.post(url_registro, json=datos)
+    return response.json(), response.status_code
+
+
 
 def mostrar_menu():
     print("\n--- Gestor de Tareas ---")
@@ -21,7 +29,10 @@ def main():
         opcion = input("Elegí una opción: ")
 
         if opcion == "1":
-            print(">> Elegiste Registrarse")
+            usuario = input("Usuario: ")
+            contraseña = input("Contraseña: ")
+            datos, codigo = registrar_usuario(usuario, contraseña)
+            print(datos.get("status") or datos.get("error"))
         elif opcion == "2":
             print(">> Elegiste Iniciar sesión")
         elif opcion == "3":
