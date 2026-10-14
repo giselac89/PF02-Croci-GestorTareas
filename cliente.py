@@ -22,6 +22,11 @@ def mostrar_menu():
     print("3. Ver tareas")
     print("4. Salir")
 
+def iniciar_sesion(usuario, contraseña):
+    datos = {"usuario": usuario, "contraseña": contraseña}
+    response = requests.post("http://localhost:5000/login", json=datos)
+    return response.json(), response.status_code
+
 
 def main():
     while True:
@@ -34,7 +39,10 @@ def main():
             datos, codigo = registrar_usuario(usuario, contraseña)
             print(datos.get("status") or datos.get("error"))
         elif opcion == "2":
-            print(">> Elegiste Iniciar sesión")
+            usuario = input("Usuario: ")
+            contraseña = input("Contraseña: ")
+            datos, codigo = iniciar_sesion(usuario, contraseña)
+            print(datos.get("status") or datos.get("error"))
         elif opcion == "3":
             print(">> Elegiste Ver tareas")
         elif opcion == "4":
