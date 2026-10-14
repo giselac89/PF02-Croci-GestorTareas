@@ -103,6 +103,29 @@ def login():
 
 
 # ---------------------------------------------------------
+# Endpoint: Tareas
+# ---------------------------------------------------------
+
+@app.route("/tareas", methods=["GET"])
+def tareas():
+    auth = request.authorization
+    if not auth or not verificar_credenciales(auth.username, auth.password):
+        return jsonify({"error": "Autenticación requerida"}), 401, {"WWW-Authenticate": 'Basic realm="Tareas"'}
+
+    html = f"""
+        <html>
+            <head><title>Tareas</title></head>
+            <body>
+                <h1>¡Bienvenido, {auth.username}!</h1>
+                <p>Accediste correctamente al sistema de gestión de tareas.</p>
+            </body>
+        </html>
+        """
+    return html
+
+
+
+# ---------------------------------------------------------
 # Programa principal
 # ---------------------------------------------------------
 
