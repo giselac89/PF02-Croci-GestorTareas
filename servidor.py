@@ -6,7 +6,7 @@
 
 from flask import Flask, request, jsonify
 import sqlite3
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
@@ -62,6 +62,45 @@ def registrar_usuario():
         return jsonify({"error": f"El usuario '{usuario_nombre}' ya existe"}), 400
     finally:
         conn.close()
+
+
+def verificar_credenciales(usuario, contraseña):
+    conn = obtener_conexion()
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT contraseña_hash FROM usuarios WHERE nombre_usuario = ?', (usuario,))
+        resultado = cursor.fetchone()
+    except sqlite3.Error:
+        return False
+    finally:
+        conn.close()
+
+    if resultado:
+        contraseña_hash = resultado[0]
+        return check_password_hash(contraseña_hash, contraseña)
+    return False
+
+
+# ---------------------------------------------------------
+# Endpoint: Login
+# ---------------------------------------------------------
+
+@app.route("/login", methods=["POST"])
+def login():
+    datos = request.get_json(silent=True)
+    
+    if not datos or "usuario" not in datos or "contraseña" not in datos:
+        return jsonify({"error": "Faltan datos: se requiere 'usuario' y 'contraseña'"}), 400
+
+    usuario_nombre = datos["usuario"]
+    usuario_pass = datos["contraseña"]
+
+    if verificar_credenciales(usuario_nombre, usuario_pass):
+        return jsonify({"status": f"Usuario '{usuario_nombre}' autenticado exitosamente"}), 200
+    else:
+        return jsonify({"error": "Credenciales inválidas"}), 401
+
 
 # ---------------------------------------------------------
 # Programa principal
