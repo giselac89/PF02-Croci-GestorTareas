@@ -13,7 +13,6 @@ app = Flask(__name__)
 app.json.ensure_ascii = False 
 NOMBRE_DB = 'usuarios.db'
 
-app.config['SECRET_KEY'] = 'tu_clave_secreta'
 
 # ---------------------------------------------------------
 # Inicialización de la base de datos

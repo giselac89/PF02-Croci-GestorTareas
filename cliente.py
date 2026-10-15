@@ -4,11 +4,12 @@
 # ---------------------------
 
 import requests
+import getpass
 
 URL_BASE = "http://localhost:5000"
 
 def registrar_usuario(usuario, contraseña):
-    url_registro = "http://localhost:5000/registro"
+    url_registro = URL_BASE + "/registro"
     datos = {"usuario": usuario, "contraseña": contraseña}
     response = requests.post(url_registro, json=datos)
     return response.json(), response.status_code
@@ -24,11 +25,11 @@ def mostrar_menu():
 
 def iniciar_sesion(usuario, contraseña):
     datos = {"usuario": usuario, "contraseña": contraseña}
-    response = requests.post("http://localhost:5000/login", json=datos)
+    response = requests.post(URL_BASE + "/login", json=datos)
     return response.json(), response.status_code
 
 def ver_tareas(usuario, contraseña):
-    response = requests.get("http://localhost:5000/tareas", auth=(usuario, contraseña))    
+    response = requests.get(URL_BASE + "/tareas", auth=(usuario, contraseña))    
     return response.text, response.status_code
 
 
@@ -39,17 +40,17 @@ def main():
 
         if opcion == "1":
             usuario = input("Usuario: ")
-            contraseña = input("Contraseña: ")
+            contraseña = getpass.getpass("Contraseña: ")
             datos, codigo = registrar_usuario(usuario, contraseña)
             print(datos.get("status") or datos.get("error"))
         elif opcion == "2":
             usuario = input("Usuario: ")
-            contraseña = input("Contraseña: ")
+            contraseña = getpass.getpass("Contraseña: ")
             datos, codigo = iniciar_sesion(usuario, contraseña)
             print(datos.get("status") or datos.get("error"))
         elif opcion == "3":
             usuario = input("Usuario: ")
-            contraseña = input("Contraseña: ")
+            contraseña = getpass.getpass("Contraseña: ")
             texto, codigo = ver_tareas(usuario, contraseña)
             if codigo == 200:
                 print(texto)
