@@ -48,6 +48,20 @@ def registrar_usuario():
 
     usuario_nombre = datos["usuario"]
     usuario_pass = datos["contraseña"]
+
+    # --- Validaciones ---
+    if not usuario_nombre.strip():
+        return jsonify({"error": "El usuario no puede estar vacío"}), 400
+
+    if not any(c.isalpha() for c in usuario_nombre):
+        return jsonify({"error": "El usuario debe contener letras, no puede ser solo números"}), 400
+
+    if len(usuario_pass) < 4:
+        return jsonify({"error": "La contraseña debe tener al menos 4 caracteres"}), 400
+
+    if " " in usuario_pass:
+        return jsonify({"error": "La contraseña no puede contener espacios"}), 400
+
     
     pass_hash = generate_password_hash(usuario_pass)
     conn = obtener_conexion()
