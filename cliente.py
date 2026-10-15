@@ -27,6 +27,10 @@ def iniciar_sesion(usuario, contraseña):
     response = requests.post("http://localhost:5000/login", json=datos)
     return response.json(), response.status_code
 
+def ver_tareas(usuario, contraseña):
+    response = requests.get("http://localhost:5000/tareas", auth=(usuario, contraseña))    
+    return response.text, response.status_code
+
 
 def main():
     while True:
@@ -44,7 +48,13 @@ def main():
             datos, codigo = iniciar_sesion(usuario, contraseña)
             print(datos.get("status") or datos.get("error"))
         elif opcion == "3":
-            print(">> Elegiste Ver tareas")
+            usuario = input("Usuario: ")
+            contraseña = input("Contraseña: ")
+            texto, codigo = ver_tareas(usuario, contraseña)
+            if codigo == 200:
+                print(texto)
+            else:
+                print("Acceso denegado. Usuario o contraseña incorrectos.")
         elif opcion == "4":
             print("¡Hasta luego!")
             break
@@ -53,4 +63,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nPrograma cerrado.")
