@@ -62,11 +62,11 @@ Muestra un menú con las opciones:
 
 ## Endpoints de la API
 
-| Método | Endpoint    | Descripción                             | Autenticación |
-|--------|-------------|-----------------------------------------|---------------|
-| POST   | `/registro` | Registra un usuario nuevo               | No            |
-| POST   | `/login`    | Verifica usuario y contraseña           | No            |
-| GET    | `/tareas`   | Muestra una página HTML de bienvenida   | Básica        |
+| Método | Endpoint    | Descripción                             | ¿Requiere estar autenticado? |
+|--------|-------------|-----------------------------------------|----------------------------- |
+| POST   | `/registro` | Registra un usuario nuevo               | No                           |
+| POST   | `/login`    | Verifica usuario y contraseña           | No (punto de entrada)        |
+| GET    | `/tareas`   | Muestra una página HTML de bienvenida   | Si, autenticación básica     |
 
 - `/registro` y `/login` reciben un JSON con el formato:
   `{"usuario": "nombre", "contraseña": "1234"}`
@@ -81,7 +81,7 @@ Al registrar un usuario, el servidor valida que:
 - El usuario no esté vacío.
 - El usuario contenga al menos una letra (no puede ser solo números).
 - La contraseña tenga al menos 4 caracteres.
-- La contraseña no contenga espacios.
+- La contraseña no contenga solo espacios.
 
 Si algún dato no cumple, el servidor responde con el código `400` y un mensaje
 explicando el motivo.
@@ -102,24 +102,26 @@ Seguir el menú de `cliente.py`: registrar un usuario (opción 1), iniciar sesi�
 
 Registrar un usuario:
 
-```
-curl.exe -i -X POST -H "Content-Type: application/json" -d "{\"usuario\":\"Mauricio\",\"contraseña\":\"1234\"}" http://localhost:5000/registro
-```
+​```
+curl.exe -i -X POST -H "Content-Type: application/json" -d '{\"usuario\":\"Mauricio\",\"contrase\u00f1a\":\"1234\"}' http://localhost:5000/registro
+​```
 
-> En PowerShell se usa `ñ` en lugar de la letra ñ para evitar problemas de
-> codificación. Equivale a escribir "contraseña".
+> **Notas para PowerShell:**
+> - El JSON del `-d` va entre comillas **simples** (`'...'`); con comillas dobles, PowerShell rompe el comando.
+> - Se escribe `\u00f1` en lugar de la letra ñ para evitar problemas de codificación. `contrase\u00f1a` equivale a "contraseña".
 
 Iniciar sesión:
 
-```
-curl.exe -i -X POST -H "Content-Type: application/json" -d "{\"usuario\":\"Mauricio\",\"contraseña\":\"1234\"}" http://localhost:5000/login
-```
+​```
+curl.exe -i -X POST -H "Content-Type: application/json" -d '{\"usuario\":\"Mauricio\",\"contrase\u00f1a\":\"1234\"}' http://localhost:5000/login
+​```
 
 Ver las tareas (autenticación básica):
 
-```
+​```
 curl.exe -i -u "Mauricio:1234" http://localhost:5000/tareas
-```
+​```
+
 
 ### Resultados esperados
 
@@ -222,31 +224,21 @@ Tabla `usuarios`:
 
 ### ¿Por qué hashear contraseñas?
 
-Hashear una contraseña significa transformarla en un texto irreconocible usando
-una función de un solo sentido: a partir del hash no se puede volver a la
-contraseña original. Esto es importante porque, si las contraseñas se guardaran
-en texto plano y alguien lograra acceder a la base de datos, tendría acceso
-directo a las contraseñas reales de todos los usuarios.
+Porque al hashear una contraseña no se puede volver a la contraseña original. Esto es importante porque, si las contraseñas se guardaran
+en texto plano y alguien lograra acceder a la base de datos, tendría acceso directo a las contraseñas reales de todos los usuarios.
 
-Guardando solo el hash, aunque la base de datos quede expuesta, las contraseñas
-siguen protegidas. Para verificar un inicio de sesión no se comparan las
-contraseñas directamente, sino sus hashes: se hashea la contraseña ingresada y se
-compara con el hash guardado.
+Guardando el hash, aunque la base de datos quede expuesta, las contraseñas siguen protegidas. Para verificar un inicio de sesión no se comparan las
+contraseñas directamente, sino sus hashes: se hashea la contraseña ingresada y se compara con el hash guardado.
 
-En este proyecto se usa la librería `werkzeug.security`, con
-`generate_password_hash` para guardar y `check_password_hash` para verificar.
+En este proyecto se usa la librería `werkzeug.security`, con  `generate_password_hash` para guardar y `check_password_hash` para verificar.
 
 ### Ventajas de usar SQLite en este proyecto
 
-- **No requiere instalación de un servidor de base de datos aparte:** SQLite
-  guarda todo en un único archivo (`usuarios.db`), lo que simplifica mucho el
-  desarrollo y las pruebas.
-- **Viene incluido con Python:** el módulo `sqlite3` es parte de la librería
-  estándar, no hay que instalar nada adicional.
-- **Es liviano y suficiente** para un proyecto de este tamaño, donde solo se
-  necesita almacenar usuarios.
-- **Persiste los datos:** a diferencia de guardar los usuarios en memoria (que se
-  perderían al apagar el servidor), SQLite los mantiene guardados en el archivo
+- **No requiere instalación de un servidor de base de datos aparte:** 
+  SQLite guarda todo en un único archivo (`usuarios.db`), lo que simplifica mucho el desarrollo y las pruebas.
+- **Viene incluido con Python:** el módulo `sqlite3` es parte de la librería estándar, no hay que instalar nada adicional.
+- **Es liviano y suficiente** para un proyecto de este tamaño, donde solo se necesita almacenar usuarios.
+- **Persiste los datos:** a diferencia de guardar los usuarios en memoria (que se perderían al apagar el servidor), SQLite los mantiene guardados en el archivo
   entre ejecuciones.
 
 ---
